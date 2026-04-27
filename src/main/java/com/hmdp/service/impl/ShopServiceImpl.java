@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.CacheClients;
 import com.hmdp.utils.RedisData;
 import com.hmdp.utils.SystemConstants;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResult;
@@ -24,7 +25,7 @@ import org.springframework.data.redis.domain.geo.GeoReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
+
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -55,6 +56,52 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Autowired
     private Cache<Long, Shop> shopCache;
 
+
+/*
+    jemeter测压代码
+    // 0 = DB直查，1 = Redis，2 = Redis + Caffeine
+    private int mode =2;
+    // 模式0：纯数据库
+        if (mode == 0) {
+        log.info("查询数据库 id={}", id);
+        try {
+            Thread.sleep(20); // 👈 模拟数据库耗时（20ms）
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Shop shop = getById(id);
+        return Result.ok(shop);
+    }
+
+    // 模式2：先查本地缓存（Caffeine）
+        if (mode == 2) {
+        Shop shop = shopCache.getIfPresent(id);
+        if (shop != null) {
+            return Result.ok(shop);
+        }
+    }
+
+    // Redis 查询（模式1 和 模式2都会走）
+    Shop shop = cacheClients.queryWithPassThrough(
+            CACHE_SHOP_KEY,
+            id,
+            Shop.class,
+            this::getById,
+            CACHE_SHOP_TTL,
+            TimeUnit.MINUTES
+    );
+
+        if (shop == null) {
+        return Result.fail("店铺不存在!");
+    }
+
+    // 模式2：写入本地缓存
+        if (mode == 2) {
+        shopCache.put(id, shop);
+    }
+
+        return Result.ok(shop);
+}*/
     @Override
     public Result queryById(Long id) {
         Shop shop=shopCache.getIfPresent(id);

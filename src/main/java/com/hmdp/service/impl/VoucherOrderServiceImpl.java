@@ -22,8 +22,8 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -95,17 +95,15 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     }
 
     // 消费端调用
-
-
     @Transactional
     public void createVoucherOrderInDB(VoucherOrder voucherOrder) {
         Long userId = voucherOrder.getUserId();
         Long voucherId = voucherOrder.getVoucherId();
 
         // 再次检查“一人一单”
-        int count = voucherOrderMapper.selectCount(new QueryWrapper<VoucherOrder>()
+        Long count = voucherOrderMapper.selectCount(new QueryWrapper<VoucherOrder>()
                 .eq("user_id", userId).eq("voucher_id", voucherId));
-        if (count > 0) {
+        if (count != null && count > 0) {
             log.error("用户{}已购买过优惠券{}，订单重复", userId, voucherId);
             return;
         }

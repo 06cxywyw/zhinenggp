@@ -17,9 +17,11 @@ public class RedissionConfig {
 
         Config config = new Config();
 
+      /*  config.useSingleServer()
+                .setAddress("localhost")
+                .setPassword("");*/
         config.useSingleServer()
-                .setAddress("redis://192.168.88.130:6379")
-                .setPassword("123456");
+                .setAddress("redis://127.0.0.1:6379");
 
         return Redisson.create(config);
     }
