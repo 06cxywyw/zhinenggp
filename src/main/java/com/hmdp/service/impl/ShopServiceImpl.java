@@ -12,6 +12,7 @@ import com.hmdp.mapper.ShopMapper;
 import com.hmdp.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.CacheClients;
+import com.hmdp.utils.CachePublisher;
 import com.hmdp.utils.RedisData;
 import com.hmdp.utils.SystemConstants;
 import jakarta.annotation.Resource;
@@ -55,6 +56,8 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     private CacheClients cacheClients;
     @Autowired
     private Cache<Long, Shop> shopCache;
+    @Autowired
+    private CachePublisher cachePublisher;
 
 
 /*
@@ -189,8 +192,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             return Result.fail("店铺id不能为空");
         }
         save(shop);
-        shopCache.invalidate( id);
+        shopCache.invalidate(id);
         stringRedisTemplate.delete(CACHE_SHOP_KEY+id);
+        // 发布缓存清除消息，通知其他实例
+        cachePublisher.publishCacheClear("shop", id.toString());
         return Result.ok();
     }
 
@@ -201,9 +206,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         if(id==null){
             return Result.fail("店铺id不能为空");
         }
-        updateById( shop);
+        updateById(shop);
         shopCache.invalidate(id);
         stringRedisTemplate.delete(CACHE_SHOP_KEY+shop.getId());
+        // 发布缓存清除消息，通知其他实例
+        cachePublisher.publishCacheClear("shop", id.toString());
         return Result.ok();
     }
 
